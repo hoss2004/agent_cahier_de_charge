@@ -1,0 +1,56 @@
+{
+  "purpose": "Schema de sortie pour Agent 3 - Agile & Backlog.",
+  "artifacts": {
+    "epics": {
+      "id_format": "EPIC-01",
+      "required_fields": ["id", "title", "description", "requirement_ids", "priority"]
+    },
+    "features": {
+      "id_format": "FEAT-01",
+      "required_fields": ["id", "epic_id", "title", "description", "requirement_ids", "priority"]
+    },
+    "user_stories": {
+      "id_format": "US-001",
+      "required_fields": [
+        "id",
+        "epic_id",
+        "feature_id",
+        "requirement_ids",
+        "role",
+        "story",
+        "priority",
+        "story_points",
+        "acceptance_criteria"
+      ],
+      "story_format": "En tant que [role], je veux [objectif], afin de [benefice]."
+    },
+    "acceptance_criteria": {
+      "id_format": "AC-001",
+      "required_fields": ["id", "user_story_id", "given", "when", "then"]
+    },
+    "backlog": {
+      "required_fields": [
+        "rank",
+        "item_id",
+        "title",
+        "priority",
+        "story_points",
+        "epic_id",
+        "feature_id",
+        "requirement_ids"
+      ]
+    },
+    "traceability_matrix": {
+      "required_fields": [
+        "requirement_id",
+        "epic_id",
+        "feature_id",
+        "user_story_ids",
+        "acceptance_criteria_ids"
+      ]
+    }
+  },
+  "priority_rule": "Conserver la priorite MoSCoW des requirements quand elle existe.",
+  "story_points_scale": [1, 2, 3, 5, 8, 13],
+  "traceability_rule": "Chaque requirement source doit apparaitre dans au moins une user story et dans la matrice de tracabilite."
+}

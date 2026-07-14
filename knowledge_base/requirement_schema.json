@@ -1,0 +1,44 @@
+{
+  "purpose": "Schema de sortie pour les requirements generes par Agent 2.",
+  "required_fields": [
+    "id",
+    "title",
+    "description",
+    "type",
+    "priority",
+    "source",
+    "rationale",
+    "acceptance_criteria"
+  ],
+  "id_format": "REQ-001",
+  "description_rule": "La description doit commencer par 'Le systeme doit' et etre testable.",
+  "allowed_types": [
+    "functional",
+    "non_functional",
+    "business_rule",
+    "data",
+    "security",
+    "reporting",
+    "integration",
+    "ui_ux",
+    "constraint"
+  ],
+  "allowed_priorities": ["Must", "Should", "Could", "Won't"],
+  "acceptance_criteria_format": [
+    "Given un contexte clair",
+    "When une action precise est realisee",
+    "Then un resultat observable doit se produire"
+  ],
+  "example": {
+    "id": "REQ-001",
+    "title": "Soumettre une reclamation",
+    "description": "Le systeme doit permettre au client authentifie de soumettre une reclamation avec un type, une description et des pieces jointes.",
+    "type": "functional",
+    "priority": "Must",
+    "source": "demande_initiale",
+    "rationale": "Cette exigence couvre le besoin principal de creation des reclamations.",
+    "acceptance_criteria": [
+      "Given un client authentifie, When il remplit et valide le formulaire de reclamation, Then la reclamation est creee avec le statut 'nouvelle'."
+    ]
+  }
+}

@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReqBot - Plateforme de spécification</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0B0F;
+  --bg-card: #111318;
+  --bg-card2: #16181F;
+  --bg-input: #1A1D26;
+  --border: rgba(255,255,255,0.07);
+  --border-strong: rgba(255,255,255,0.12);
+  --purple: #7C6FE0;
+  --purple-light: #9D92E8;
+  --purple-dim: rgba(124,111,224,0.12);
+  --purple-glow: rgba(124,111,224,0.25);
+  --teal: #3ECFA0;
+  --teal-dim: rgba(62,207,160,0.1);
+  --amber: #F5A623;
+  --amber-dim: rgba(245,166,35,0.1);
+  --red: #EF4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --text: #F0EFF8;
+  --text-2: #9A98B0;
+  --text-3: #5C5A72;
+  --mono: 'JetBrains Mono', Consolas, monospace;
+  --sans: 'Inter', Arial, sans-serif;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); font-family: var(--sans); color: var(--text); overflow: hidden; }
+button, textarea, input { font: inherit; }
+
+.shell { display: grid; grid-template-columns: 260px minmax(0, 1fr) 300px; grid-template-rows: 56px minmax(0, 1fr); height: 100vh; }
+.topbar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid var(--border); background: var(--bg-card); gap: 14px; }
+.sidebar-left { border-right: 1px solid var(--border); background: var(--bg-card); display: flex; flex-direction: column; overflow: hidden; }
+.chat-zone, .val-page, .result-page { display: none; flex-direction: column; overflow: hidden; background: var(--bg); min-width: 0; }
+.chat-zone.active, .val-page.active, .result-page.active { display: flex; }
+.sidebar-right { border-left: 1px solid var(--border); background: var(--bg-card); display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.logo-mark { width: 32px; height: 32px; border-radius: 8px; background: var(--purple); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.logo-mark::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent 62%); }
+.logo-mark svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; position: relative; z-index: 1; }
+.logo-name { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+.logo-version { font-size: 10px; font-family: var(--mono); color: var(--purple-light); background: var(--purple-dim); padding: 2px 6px; border-radius: 4px; }
+.nav-steps { display: flex; gap: 2px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 3px; min-width: 0; }
+.nav-step { padding: 5px 13px; border-radius: 7px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text-3); transition: all .2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; border: 0; background: transparent; }
+.nav-step.active { background: var(--purple); color: #fff; }
+.nav-step.done { color: var(--teal); }
+.step-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .7; }
+.top-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.top-btn { padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-2); font-size: 12px; cursor: pointer; transition: all .15s; }
+.top-btn:hover { background: var(--bg-card2); color: var(--text); }
+.mode-chip { padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(62,207,160,.25); background: var(--teal-dim); color: var(--teal); font-size: 11px; font-weight: 600; white-space: nowrap; }
+
+.side-section { padding: 16px; border-bottom: 1px solid var(--border); }
+.side-label { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+.context-chip { display: flex; align-items: flex-start; gap: 8px; padding: 9px 10px; border-radius: var(--radius-sm); background: var(--bg-input); border: 1px solid var(--border); margin-bottom: 6px; transition: border-color .2s; }
+.context-chip.filled { border-color: var(--purple-glow); }
+.chip-icon { width: 22px; height: 22px; border-radius: 5px; background: var(--purple-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.chip-icon svg { width: 12px; height: 12px; stroke: var(--purple-light); fill: none; stroke-width: 2; }
+.chip-label { font-size: 10px; color: var(--text-3); margin-bottom: 2px; }
+.chip-val { font-size: 12px; color: var(--text); font-weight: 500; line-height: 1.35; word-break: break-word; }
+.chip-val.empty { color: var(--text-3); font-weight: 400; font-style: italic; }
+.progress-wrap { padding: 16px; }
+.progress-label { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.progress-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--purple); border-radius: 2px; transition: width .5s ease; }
+.agents-list { padding: 12px 16px; flex: 1; overflow-y: auto; }
+.agent-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--radius-sm); margin-bottom: 4px; transition: background .15s; }
+.agent-row.active { background: var(--purple-dim); }
+.agent-row.done { opacity: .75; }
+.agent-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
+.agent-row.active .agent-dot { background: var(--purple); box-shadow: 0 0 6px var(--purple); }
+.agent-row.done .agent-dot { background: var(--teal); }
+.agent-info { flex: 1; min-width: 0; }
+.agent-name { font-size: 12px; font-weight: 500; }
+.agent-sub { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+.agent-badge { font-size: 9px; font-family: var(--mono); padding: 2px 5px; border-radius: 4px; }
+.badge-active { background: var(--purple-dim); color: var(--purple-light); }
+.badge-wait { background: var(--border); color: var(--text-3); }
+.badge-done { background: var(--teal-dim); color: var(--teal); }
+
+.chat-header, .val-header, .result-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; min-height: 58px; }
+.chat-header-title, .page-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.chat-header-sub, .page-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.chat-status { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--teal); }
+.pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+.messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
+.messages::-webkit-scrollbar, .r-panel::-webkit-scrollbar, .page-body::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-thumb, .r-panel::-webkit-scrollbar-thumb, .page-body::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+.msg { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp .25s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.msg.user { flex-direction: row-reverse; }
+.av { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; font-weight: 600; }
+.av-a { background: var(--purple); color: #fff; }
+.av-u { background: var(--bg-card2); border: 1px solid var(--border-strong); color: var(--text-2); }
+.bubble { max-width: 760px; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.bubble-a { background: var(--bg-card2); border: 1px solid var(--border); color: var(--text); border-radius: 4px 14px 14px 14px; }
+.bubble-u { background: var(--purple); color: #fff; border-radius: 14px 4px 14px 14px; }
+.bubble-sys { background: transparent; border: 1px solid var(--teal-dim); color: var(--teal); border-radius: 8px; text-align: center; font-size: 12px; align-self: center; max-width: 85%; }
+.msg-meta { font-size: 10px; color: var(--text-3); margin-top: 3px; }
+.msg.user .msg-meta { text-align: right; }
+.typing-bubble { display: flex; align-items: center; gap: 4px; padding: 10px 14px; background: var(--bg-card2); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; }
+.typing-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--purple-light); animation: blink 1.2s infinite; }
+.typing-dot:nth-child(2){animation-delay:.2s} .typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+.q-block { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.q-row { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; line-height: 1.4; }
+.q-idx { width: 18px; height: 18px; border-radius: 50%; background: var(--purple); color: #fff; font-size: 9px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.answer-form { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.answer-field { padding: 9px; border-radius: var(--radius-sm); background: var(--bg-input); border: 1px solid var(--border); }
+.answer-label { display: flex; gap: 7px; color: var(--text-2); font-size: 11px; line-height: 1.4; margin-bottom: 7px; }
+.answer-textarea { width: 100%; min-height: 58px; resize: vertical; background: #0F1118; color: var(--text); border: 1px solid var(--border-strong); outline: none; border-radius: 8px; padding: 8px; font-size: 12px; line-height: 1.45; }
+.answer-textarea:focus { border-color: var(--purple); }
+.mini-btn { align-self: flex-start; border: 1px solid var(--purple); background: var(--purple); color: #fff; border-radius: 8px; padding: 8px 13px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.mini-btn:hover { background: var(--purple-light); }
+.mini-btn:disabled { opacity: .45; cursor: default; }
+.issue-box { margin-top: 10px; background: var(--red-dim); border: 1px solid rgba(239,68,68,.25); color: #FCA5A5; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+.live-trace { margin-top: 10px; padding: 10px; border-radius: 8px; background: #0F1118; border: 1px solid var(--border); font-size: 11px; color: var(--text-2); min-width: 260px; }
+.live-trace-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; color: var(--text); font-weight: 600; }
+.live-trace-time { font-family: var(--mono); color: var(--purple-light); font-size: 10px; white-space: nowrap; }
+.live-trace-row { display: flex; align-items: center; gap: 7px; padding: 4px 0; color: var(--text-3); }
+.live-trace-row.active { color: var(--text); }
+.live-trace-row.done { color: var(--teal); }
+.live-trace-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
+.live-trace-row.active .live-trace-dot { background: var(--purple); box-shadow: 0 0 8px var(--purple); animation: pulse 1.2s infinite; }
+.live-trace-row.done .live-trace-dot { background: var(--teal); }
+.live-trace-note { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); color: var(--text-3); line-height: 1.45; }
+.chat-notify { padding: 10px 20px; background: var(--teal-dim); border-top: 1px solid rgba(62,207,160,.2); display: none; align-items: center; gap: 10px; font-size: 12px; color: var(--teal); }
+.chat-notify.show { display: flex; }
+.btn-continue { margin-left: auto; padding: 5px 14px; border-radius: 6px; background: var(--teal); color: #000; font-size: 12px; font-weight: 600; border: none; cursor: pointer; }
+.input-zone { padding: 14px 20px; border-top: 1px solid var(--border); }
+.input-wrap { display: flex; align-items: flex-end; gap: 10px; background: var(--bg-input); border: 1px solid var(--border-strong); border-radius: 12px; padding: 8px 10px; transition: border-color .2s; }
+.input-wrap:focus-within { border-color: var(--purple); }
+.chat-input { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; color: var(--text); resize: none; max-height: 120px; line-height: 1.5; min-width: 0; }
+.chat-input::placeholder { color: var(--text-3); }
+.input-actions { display: flex; gap: 6px; align-items: center; }
+.attach-btn, .send-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; }
+.attach-btn { background: transparent; border: 1px solid var(--border-strong); color: var(--text-3); }
+.attach-btn:hover { background: var(--bg-card2); color: var(--text); }
+.send-btn { background: var(--purple); border: none; }
+.send-btn:hover { background: var(--purple-light); }
+.send-btn:disabled { opacity: .35; cursor: default; }
+.send-btn svg { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 2; }
+.input-hint { font-size: 10px; color: var(--text-3); margin-top: 6px; display: flex; justify-content: space-between; gap: 10px; }
+.file-pill { color: var(--purple-light); max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.right-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.r-tab { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 500; cursor: pointer; color: var(--text-3); border: none; border-bottom: 2px solid transparent; background: transparent; transition: all .15s; }
+.r-tab.active { color: var(--purple-light); border-bottom-color: var(--purple); }
+.r-panel { flex: 1; overflow-y: auto; padding: 14px; display: none; }
+.r-panel.active { display: block; }
+.r-section { margin-bottom: 14px; }
+.r-section-title { font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+.empty-panel { color: var(--text-3); font-size: 12px; line-height: 1.5; padding: 10px; border: 1px dashed var(--border-strong); border-radius: 8px; }
+.req-item, .us-item, .backlog-row { border-radius: var(--radius-sm); background: var(--bg-input); border: 1px solid var(--border); margin-bottom: 6px; }
+.req-item { padding: 8px 10px; }
+.req-id-tag { font-size: 9px; font-family: var(--mono); font-weight: 600; background: var(--purple-dim); color: var(--purple-light); padding: 1px 5px; border-radius: 3px; display: inline-block; margin-bottom: 3px; }
+.req-text { font-size: 11px; color: var(--text); line-height: 1.4; }
+.req-type { font-size: 9px; color: var(--text-3); margin-top: 3px; }
+.us-item { padding: 9px 10px; }
+.us-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 6px; }
+.us-id { font-size: 9px; font-family: var(--mono); color: var(--purple-light); }
+.moscow { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 600; }
+.must { background: rgba(239,68,68,.15); color: #EF4444; }
+.should { background: var(--amber-dim); color: var(--amber); }
+.could { background: var(--teal-dim); color: var(--teal); }
+.us-text { font-size: 11px; color: var(--text); line-height: 1.5; }
+.us-ac { margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text-3); font-family: var(--mono); line-height: 1.45; }
+.backlog-row { display: flex; align-items: center; gap: 6px; padding: 7px 8px; font-size: 11px; }
+.bl-id { font-family: var(--mono); font-size: 9px; color: var(--purple-light); min-width: 44px; }
+.bl-text { flex: 1; color: var(--text); min-width: 0; }
+.bl-pts { font-family: var(--mono); font-size: 10px; color: var(--text-3); min-width: 28px; text-align: right; }
+.r-export-zone { padding: 14px; border-top: 1px solid var(--border); }
+.export-title { font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+.export-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border-radius: var(--radius-sm); background: var(--bg-input); border: 1px solid var(--border); color: var(--text-2); font-size: 12px; cursor: pointer; margin-bottom: 5px; transition: all .15s; text-align: left; text-decoration: none; }
+.export-btn:hover { border-color: var(--purple); color: var(--text); background: var(--bg-card2); }
+.export-btn.disabled { opacity: .35; pointer-events: none; }
+.export-btn-main { background: var(--purple); border-color: var(--purple); color: #fff; font-weight: 500; }
+
+.page-body { flex: 1; overflow-y: auto; padding: 20px 28px; }
+.grid-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.val-card, .result-card { background: var(--bg-card2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; min-width: 0; }
+.val-card.ok, .result-card.ok { border-color: rgba(62,207,160,.25); }
+.val-card-label, .result-label { font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+.val-card.ok .val-card-label, .result-card.ok .result-label { color: var(--teal); }
+.val-card-val, .result-val { font-size: 13px; color: var(--text); line-height: 1.5; word-break: break-word; }
+.val-footer { padding: 16px 28px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-start; }
+.auto-hint { flex: 1; padding: 8px 12px; border-radius: 8px; background: var(--teal-dim); border: 1px solid rgba(62,207,160,.2); color: var(--teal); font-size: 12px; line-height: 1.45; }
+.btn-back, .btn-gen { padding: 8px 18px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all .15s; }
+.btn-back { background: transparent; border: 1px solid var(--border-strong); color: var(--text-2); }
+.btn-back:hover { background: var(--bg-card2); color: var(--text); }
+.btn-gen { background: var(--purple); border: 1px solid var(--purple); color: #fff; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+.btn-gen:hover { background: var(--purple-light); }
+.btn-gen:disabled { opacity: .45; cursor: default; }
+.gen-anim { display: none; flex: 1; flex-direction: column; gap: 6px; justify-content: center; }
+.gen-anim.show { display: flex; }
+.gen-step { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-3); padding: 4px 0; transition: color .3s; }
+.gen-step.done { color: var(--teal); }
+.gen-step.active { color: var(--text); }
+.gen-step-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; transition: all .3s; }
+.gen-step.done .gen-step-dot { background: var(--teal); }
+.gen-step.active .gen-step-dot { background: var(--purple); box-shadow: 0 0 8px var(--purple); animation: pulse 1s infinite; }
+.trace-list { display: flex; flex-direction: column; gap: 8px; }
+.trace-item { padding: 9px 10px; border: 1px solid var(--border); background: var(--bg-input); border-radius: 8px; font-size: 11px; line-height: 1.45; }
+.trace-agent { color: var(--purple-light); font-family: var(--mono); font-size: 10px; margin-bottom: 3px; }
+.path-box { padding: 10px; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border); font-family: var(--mono); color: var(--text-2); font-size: 11px; overflow-wrap: anywhere; }
+.checklist { display: grid; gap: 8px; margin-top: 12px; }
+.check-item { display: flex; gap: 8px; align-items: flex-start; padding: 9px 10px; border-radius: 8px; background: var(--bg-input); border: 1px solid var(--border); font-size: 12px; color: var(--text-2); line-height: 1.45; }
+.check-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); margin-top: 5px; flex-shrink: 0; }
+
+@media (max-width: 980px) {
+  html, body { overflow: auto; }
+  .shell { min-height: 100vh; height: auto; grid-template-columns: 1fr; grid-template-rows: auto; }
+  .topbar, .sidebar-left, .chat-zone, .val-page, .result-page, .sidebar-right { grid-column: 1; }
+  .topbar { flex-wrap: wrap; height: auto; padding: 12px; }
+  .nav-steps { order: 3; width: 100%; overflow-x: auto; }
+  .sidebar-left { max-height: none; border-right: 0; border-bottom: 1px solid var(--border); }
+  .sidebar-right { border-left: 0; border-top: 1px solid var(--border); min-height: 420px; }
+  .messages { min-height: 420px; }
+  .grid-two { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="logo-name">ReqBot</span>
+      <span class="logo-version">web</span>
+    </div>
+    <nav class="nav-steps">
+      <button class="nav-step active" id="tab1" onclick="goTab(1)"><span class="step-dot"></span>Collecte</button>
+      <button class="nav-step" id="tab2" onclick="goTab(2)"><span class="step-dot"></span>Validation</button>
+      <button class="nav-step" id="tab3" onclick="goTab(3)"><span class="step-dot"></span>Résultat</button>
+      <button class="nav-step" id="tab4" onclick="goTab(4)"><span class="step-dot"></span>Export</button>
+    </nav>
+    <div class="top-actions">
+      <span class="mode-chip">Auto pipeline · HF ready</span>
+      <button class="top-btn" onclick="newProject()">Nouveau projet</button>
+      <button class="top-btn" onclick="showHelp()">Aide</button>
+    </div>
+  </header>
+
+  <aside class="sidebar-left">
+    <div class="side-section">
+      <div class="side-label">Contexte détecté</div>
+      <div class="context-chip" id="chip-domain">
+        <div class="chip-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <div><div class="chip-label">Domaine</div><div class="chip-val empty" id="cv-domain">Non détecté</div></div>
+      </div>
+      <div class="context-chip" id="chip-actors">
+        <div class="chip-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+        <div><div class="chip-label">Acteurs</div><div class="chip-val empty" id="cv-actors">Non détectés</div></div>
+      </div>
+      <div class="context-chip" id="chip-goal">
+        <div class="chip-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+        <div><div class="chip-label">Objectif</div><div class="chip-val empty" id="cv-goal">Non détecté</div></div>
+      </div>
+    </div>
+    <div class="progress-wrap side-section">
+      <div class="progress-label">
+        <span style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)">Pipeline</span>
+        <span style="font-size:11px;font-family:var(--mono);color:var(--purple-light)" id="prog-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog-bar" style="width:0%"></div></div>
+    </div>
+    <div class="agents-list">
+      <div class="side-label" style="padding: 0 0 8px">Agents</div>
+      <div class="agent-row active" id="ar1">
+        <div class="agent-dot"></div><div class="agent-info"><div class="agent-name">Agent 1</div><div class="agent-sub">Intake & Clarification</div></div><span class="agent-badge badge-active" id="ab1">actif</span>
+      </div>
+      <div class="agent-row" id="ar2">
+        <div class="agent-dot"></div><div class="agent-info"><div class="agent-name">Agent 2</div><div class="agent-sub">Validation & Analysis</div></div><span class="agent-badge badge-wait" id="ab2">attente</span>
+      </div>
+      <div class="agent-row" id="ar3">
+        <div class="agent-dot"></div><div class="agent-info"><div class="agent-name">Agent 3</div><div class="agent-sub">Agile & Backlog</div></div><span class="agent-badge badge-wait" id="ab3">attente</span>
+      </div>
+    </div>
+  </aside>
+
+  <section class="chat-zone active" id="p1">
+    <div class="chat-header">
+      <div>
+        <div class="chat-header-title">Collecte du besoin</div>
+        <div class="chat-header-sub">Agent 1 analyse la demande et pose les bonnes questions</div>
+      </div>
+      <div class="chat-status" id="chat-status"><div class="pulse"></div>En écoute</div>
+    </div>
+    <div class="messages" id="msg-list"></div>
+    <div class="chat-notify" id="notify">
+      Collecte terminée. Le pipeline continue automatiquement vers Agent 2 et Agent 3.
+      <button class="btn-continue" onclick="goTab(2)">Voir l'état</button>
+    </div>
+    <div class="input-zone">
+      <div class="input-wrap">
+        <textarea class="chat-input" id="chat-input" rows="1" placeholder="Décrivez votre projet..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+        <div class="input-actions">
+          <input type="file" id="file-input" hidden accept=".txt,.md,.pdf,.doc,.docx,.png,.jpg,.jpeg,.webp,.bmp" onchange="selectFile(event)">
+          <button class="attach-btn" title="Joindre un fichier" onclick="document.getElementById('file-input').click()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <button class="send-btn" id="send-btn" onclick="sendMsg()" disabled>
+            <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="input-hint"><span>Entrée pour envoyer. Maj+Entrée pour nouvelle ligne.</span><span class="file-pill" id="file-pill"></span></div>
+    </div>
+  </section>
+
+  <section class="val-page" id="p2">
+    <div class="val-header">
+      <div>
+        <div class="page-title">Validation des informations</div>
+        <div class="page-sub">Snapshot du SharedState. Agent 2 et Agent 3 se lancent automatiquement dès que les réponses sont suffisantes.</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="grid-two">
+        <div class="val-card"><div class="val-card-label">Demande initiale</div><div class="val-card-val" id="vv-input">-</div></div>
+        <div class="val-card ok"><div class="val-card-label">Domaine détecté</div><div class="val-card-val" id="vv-domain">-</div></div>
+        <div class="val-card ok"><div class="val-card-label">Acteurs identifiés</div><div class="val-card-val" id="vv-actors">-</div></div>
+        <div class="val-card ok"><div class="val-card-label">Objectif principal</div><div class="val-card-val" id="vv-goal">-</div></div>
+        <div class="val-card"><div class="val-card-label">Questions / réponses</div><div class="val-card-val" id="vv-questions">-</div></div>
+        <div class="val-card"><div class="val-card-label">Statut Agent 1</div><div class="val-card-val" id="vv-status">-</div></div>
+      </div>
+    </div>
+    <div class="val-footer">
+      <button class="btn-back" onclick="goTab(1)">Retour</button>
+      <div class="auto-hint">Aucune action obligatoire : le pipeline passe automatiquement à Agent 2, Agent 3 puis à l'export. Le bouton est seulement un secours.</div>
+      <button class="btn-gen" id="btn-gen" onclick="generate()" disabled>Secours : relancer</button>
+      <div class="gen-anim" id="gen-anim">
+        <div class="gen-step" id="gs1"><div class="gen-step-dot"></div>Agent 2 - consolidation et suffisance</div>
+        <div class="gen-step" id="gs2"><div class="gen-step-dot"></div>Agent 2 - requirements structurés</div>
+        <div class="gen-step" id="gs3"><div class="gen-step-dot"></div>Agent 3 - epics, stories et backlog</div>
+        <div class="gen-step" id="gs4"><div class="gen-step-dot"></div>Export cahier des charges</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="result-page" id="p3">
+    <div class="result-header">
+      <div>
+        <div class="page-title">Résultat du pipeline</div>
+        <div class="page-sub">Requirements, backlog et raisonnement des agents</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="grid-two" style="margin-bottom:14px">
+        <div class="result-card ok"><div class="result-label">Requirements</div><div class="result-val" id="count-req">0</div></div>
+        <div class="result-card ok"><div class="result-label">User stories</div><div class="result-val" id="count-us">0</div></div>
+        <div class="result-card"><div class="result-label">Backlog</div><div class="result-val" id="count-backlog">0</div></div>
+        <div class="result-card"><div class="result-label">Statut</div><div class="result-val" id="result-status">En attente</div></div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Comment les agents ont réfléchi</div>
+        <div class="trace-list" id="trace-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="result-page" id="p4">
+    <div class="result-header">
+      <div>
+        <div class="page-title">Export cahier des charges</div>
+        <div class="page-sub">Document final complet : projet, besoins, contraintes, tests, risques, backlog et traçabilité</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="grid-two" style="margin-bottom:14px">
+        <a class="export-btn export-btn-main disabled" id="export-pdf-main" href="#">PDF - cahier des charges</a>
+        <a class="export-btn disabled" id="export-md-main" href="#">Markdown - cahier des charges</a>
+        <a class="export-btn disabled" id="export-json-main" href="#">JSON - SharedState complet</a>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Chemins générés</div>
+        <div class="path-box" id="export-paths">Aucun export disponible pour l'instant.</div>
+      </div>
+      <div class="result-card" style="margin-top:14px">
+        <div class="result-label">Préparation déploiement</div>
+        <div class="checklist">
+          <div class="check-item"><span class="check-dot"></span><span>Space Docker prêt : port 7860, serveur 0.0.0.0, entrypoint app.py.</span></div>
+          <div class="check-item"><span class="check-dot"></span><span>Mode démo sécurisé par défaut. Ajoutez GEMINI_API_KEY comme secret pour le mode intelligent réel.</span></div>
+          <div class="check-item"><span class="check-dot"></span><span>Exports, fichiers temporaires, .env et .venv exclus du déploiement.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="sidebar-right">
+    <div class="right-tabs">
+      <button class="r-tab active" id="rt1" onclick="rightTab(1)">Requirements</button>
+      <button class="r-tab" id="rt2" onclick="rightTab(2)">Stories</button>
+      <button class="r-tab" id="rt3" onclick="rightTab(3)">Backlog</button>
+    </div>
+    <div class="r-panel active" id="rp1"><div class="empty-panel">Les requirements apparaîtront après Agent 2.</div></div>
+    <div class="r-panel" id="rp2"><div class="empty-panel">Les user stories apparaîtront après Agent 3.</div></div>
+    <div class="r-panel" id="rp3"><div class="empty-panel">Le backlog apparaîtra après Agent 3.</div></div>
+    <div class="r-export-zone">
+      <div class="export-title">Exporter</div>
+      <a class="export-btn export-btn-main disabled" id="export-pdf" href="#">PDF - cahier des charges</a>
+      <a class="export-btn disabled" id="export-json" href="#">JSON - SharedState</a>
+      <a class="export-btn disabled" id="export-md" href="#">Markdown - cahier des charges</a>
+    </div>
+  </aside>
+</div>
+
+<script>
+let projectId = null;
+let selectedFile = null;
+let currentMode = 'initial';
+let lastSummary = null;
+let busy = false;
+let liveTrace = null;
+let autoRunScheduled = false;
+let autoRunAttempts = 0;
+
+const msgList = document.getElementById('msg-list');
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
+function formatReply(value) {
+  return esc(value).replace(/\n/g, '<br>');
+}
+
+function asList(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isSmallTalkBeforeProject(text) {
+  const normalized = normalizeText(text);
+  if (!normalized) return false;
+  const greetings = new Set(['bonjour', 'salut', 'hello', 'hi', 'bonsoir', 'coucou', 'slt', 'cc']);
+  if (greetings.has(normalized)) return true;
+  const projectWords = [
+    'je veux', 'application', 'site', 'plateforme', 'web', 'mobile', 'systeme',
+    'projet', 'gerer', 'gestion', 'creer', 'client', 'besoin', 'exigence'
+  ];
+  const hasProjectIntent = projectWords.some(word => normalized.includes(word));
+  return normalized.split(' ').length < 5 && !hasProjectIntent;
+}
+
+function replyBeforeProject(text) {
+  const normalized = normalizeText(text);
+  if (['bonjour', 'salut', 'hello', 'hi', 'bonsoir', 'coucou', 'slt', 'cc'].includes(normalized)) {
+    return "Bonjour. Je suis prêt. Décris ton projet en une ou deux phrases, par exemple : « Je veux une application web pour gérer les réclamations clients... ». Là seulement je lancerai Agent 1.";
+  }
+  return "Je t'écoute. Pour lancer Agent 1, donne-moi une vraie demande projet : domaine, objectif, utilisateurs et fonctionnalités attendues.";
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  document.getElementById('send-btn').disabled = busy || (el.value.trim() === '' && !selectedFile);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMsg();
+  }
+}
+
+function selectFile(event) {
+  selectedFile = event.target.files[0] || null;
+  document.getElementById('file-pill').textContent = selectedFile ? `Fichier : ${selectedFile.name}` : '';
+  autoResize(document.getElementById('chat-input'));
+}
+
+function addMsg(from, text, extraNode) {
+  const isUser = from === 'user';
+  const isSystem = from === 'system';
+  const div = document.createElement('div');
+
+  if (isSystem) {
+    div.className = 'msg';
+    div.innerHTML = `<div class="bubble bubble-sys">${esc(text)}</div>`;
+  } else {
+    div.className = 'msg' + (isUser ? ' user' : '');
+    const label = isUser ? 'Vous' : (from === 'a2' ? 'Agent 2 · Validation & Analysis' : 'Agent 1 · Intake & Clarification');
+    const avatar = isUser ? 'U' : (from === 'a2' ? 'A2' : 'A1');
+    const bubbleClass = isUser ? 'bubble-u' : 'bubble-a';
+    div.innerHTML = `
+      <div class="av ${isUser ? 'av-u' : 'av-a'}">${avatar}</div>
+      <div>
+        <div class="bubble ${bubbleClass}">${text}</div>
+        <div class="msg-meta">${label}</div>
+      </div>`;
+    if (extraNode) {
+      div.querySelector('.bubble').appendChild(extraNode);
+    }
+  }
+
+  msgList.appendChild(div);
+  msgList.scrollTop = msgList.scrollHeight;
+  return div;
+}
+
+function addTyping(agent = 'A1') {
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.id = 'typing-indicator';
+  div.innerHTML = `<div class="av av-a">${agent}</div><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  msgList.appendChild(div);
+  msgList.scrollTop = msgList.scrollHeight;
+}
+
+function removeTyping() {
+  const node = document.getElementById('typing-indicator');
+  if (node) node.remove();
+}
+
+function startLiveTrace(title, steps, note) {
+  stopLiveTrace();
+  const startedAt = Date.now();
+  const container = document.createElement('div');
+  container.className = 'live-trace';
+  container.innerHTML = `
+    <div class="live-trace-head">
+      <span>${esc(title)}</span>
+      <span class="live-trace-time">0s</span>
+    </div>
+    <div class="live-trace-rows">
+      ${steps.map((step, index) => `
+        <div class="live-trace-row ${index === 0 ? 'active' : ''}" data-index="${index}">
+          <span class="live-trace-dot"></span>
+          <span>${esc(step)}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="live-trace-note">${esc(note || "Traitement en cours. Si le modèle local est lent, cette étape peut prendre quelques dizaines de secondes.")}</div>
+  `;
+  addMsg('agent', "Je traite la demande. Voici l'avancement visible pour éviter l'impression de blocage :", container);
+
+  liveTrace = {
+    node: container,
+    steps,
+    index: 0,
+    startedAt,
+    timer: setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const timeNode = container.querySelector('.live-trace-time');
+      if (timeNode) timeNode.textContent = `${elapsed}s`;
+
+      const nextIndex = Math.min(steps.length - 1, Math.floor(elapsed / 8));
+      setLiveTraceStep(nextIndex);
+
+      const noteNode = container.querySelector('.live-trace-note');
+      if (noteNode && elapsed >= 20) {
+        noteNode.textContent = "Toujours en traitement. Le serveur attend la réponse du modèle ou termine la génération des artefacts.";
+      }
+      if (noteNode && elapsed >= 45) {
+        noteNode.textContent = "Traitement long détecté. Ce n'est pas forcément bloqué : Ollama/Gemini peut encore répondre, ou le timeout va retourner une erreur lisible.";
+      }
+    }, 1000)
+  };
+}
+
+function setLiveTraceStep(index) {
+  if (!liveTrace) return;
+  liveTrace.index = Math.max(0, Math.min(index, liveTrace.steps.length - 1));
+  liveTrace.node.querySelectorAll('.live-trace-row').forEach((row, rowIndex) => {
+    row.classList.toggle('done', rowIndex < liveTrace.index);
+    row.classList.toggle('active', rowIndex === liveTrace.index);
+  });
+}
+
+function stopLiveTrace(finalText) {
+  if (!liveTrace) return;
+  clearInterval(liveTrace.timer);
+  setLiveTraceStep(liveTrace.steps.length - 1);
+  liveTrace.node.querySelectorAll('.live-trace-row').forEach(row => {
+    row.classList.remove('active');
+    row.classList.add('done');
+  });
+  const noteNode = liveTrace.node.querySelector('.live-trace-note');
+  if (noteNode) noteNode.textContent = finalText || 'Traitement terminé.';
+  liveTrace = null;
+}
+
+function failLiveTrace(message) {
+  if (!liveTrace) return;
+  clearInterval(liveTrace.timer);
+  const noteNode = liveTrace.node.querySelector('.live-trace-note');
+  if (noteNode) {
+    noteNode.textContent = message || 'Le traitement a retourné une erreur.';
+    noteNode.style.color = '#FCA5A5';
+  }
+  liveTrace = null;
+}
+
+async function apiJson(url, payload) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json();
+  if (!response.ok || data.ok === false) throw new Error(data.error || 'Erreur API');
+  return data;
+}
+
+async function startProject(text) {
+  if (selectedFile) {
+    const form = new FormData();
+    form.append('raw_input', text);
+    form.append('file', selectedFile);
+    const response = await fetch('/api/start', {method: 'POST', body: form});
+    const data = await response.json();
+    if (!response.ok || data.ok === false) throw new Error(data.error || 'Erreur API');
+    return data;
+  }
+  return apiJson('/api/start', {raw_input: text});
+}
+
+function setBusy(value, label) {
+  busy = value;
+  document.getElementById('send-btn').disabled = value || (document.getElementById('chat-input').value.trim() === '' && !selectedFile);
+  document.getElementById('chat-status').innerHTML = value
+    ? `<div class="pulse"></div>${esc(label || 'Traitement')}`
+    : `<div class="pulse"></div>En écoute`;
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (busy || (!text && !selectedFile)) return;
+
+  if (projectId) {
+    if (selectedFile) {
+      addMsg('system', 'Pour analyser un nouveau fichier, démarrez un nouveau projet. Pour ce projet, écrivez simplement votre message.');
+      selectedFile = null;
+      document.getElementById('file-input').value = '';
+      document.getElementById('file-pill').textContent = '';
+      autoResize(input);
+      return;
+    }
+    input.value = '';
+    input.style.height = 'auto';
+    addMsg('user', esc(text));
+    await sendChat(text);
+    return;
+  }
+
+  if (!selectedFile && isSmallTalkBeforeProject(text)) {
+    input.value = '';
+    input.style.height = 'auto';
+    addMsg('user', esc(text));
+    addMsg('agent', formatReply(replyBeforeProject(text)));
+    return;
+  }
+
+  input.value = '';
+  input.style.height = 'auto';
+  addMsg('user', esc(text || `Fichier joint : ${selectedFile.name}`));
+  setBusy(true, 'Agent 1 analyse');
+  addTyping('A1');
+  startLiveTrace(
+    'Agent 1 - Intake & Clarification',
+    [
+      'Réception de la demande client',
+      'Lecture/nettoyage du texte ou fichier',
+      'Analyse du domaine, acteurs et objectif',
+      'Détection des informations manquantes',
+      'Génération des questions de clarification'
+    ],
+    'Agent 1 travaille sur la compréhension du besoin. Une demande très courte sera refusée rapidement.'
+  );
+
+  try {
+    const summary = await startProject(text);
+    removeTyping();
+    stopLiveTrace('Agent 1 a terminé son analyse.');
+    projectId = summary.project_id;
+    selectedFile = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('file-pill').textContent = '';
+    updateFromSummary(summary);
+
+    if (handleAutomaticSummary(summary)) {
+      return;
+    }
+
+    const questions = asList(summary.clarification_questions);
+    if (questions.length && !summary.ready_for_agent2) {
+      currentMode = 'clarification';
+      addAgentQuestions('agent', "J'ai analysé la demande. Pour préparer Agent 2, j'ai besoin de ces réponses :", questions, 'answers');
+    } else if (summary.ready_for_agent2) {
+      currentMode = 'ready';
+      updateAgents('done1');
+      addMsg('agent', "Collecte terminée. Le pipeline automatique prend la suite.");
+      document.getElementById('notify').classList.add('show');
+    } else {
+      addErrors(summary);
+    }
+  } catch (error) {
+    removeTyping();
+    failLiveTrace(error.message);
+    addMsg('system', error.message);
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function sendChat(message) {
+  setBusy(true, 'Chatbot répond');
+  addTyping('A1');
+  startLiveTrace(
+    'Chatbot contextuel ReqBot',
+    [
+      'Lecture du message utilisateur',
+      'Consultation du SharedState courant',
+      'Détection de l’intention',
+      'Réponse ou action sur le pipeline'
+    ],
+    'Le chatbot répond avec le contexte du projet. S’il lance un agent, le traitement peut durer plus longtemps.'
+  );
+  try {
+    const response = await apiJson('/api/chat', {project_id: projectId, message});
+    removeTyping();
+    stopLiveTrace('Réponse chatbot prête.');
+    const summary = response.summary || response;
+    updateFromSummary(summary);
+    addMsg('agent', formatReply(response.reply || 'Je suis là.'));
+
+    const phase = summary.phase;
+    if (phase === 'ready_for_agent2') {
+      currentMode = 'ready';
+      updateAgents('done1');
+      document.getElementById('notify').classList.add('show');
+    } else if (phase === 'a2a') {
+      currentMode = 'a2a';
+    } else if (phase === 'complete') {
+      currentMode = 'complete';
+      updateAgents('alldone');
+    }
+  } catch (error) {
+    removeTyping();
+    failLiveTrace(error.message);
+    addMsg('system', error.message);
+  } finally {
+    setBusy(false);
+  }
+}
+
+function handleAutomaticSummary(summary) {
+  if (summary.phase === 'a2a') {
+    currentMode = 'a2a';
+    updateAgents('running2');
+    goTab(1);
+    addAgentQuestions('a2', "Agent 2 a lancé automatiquement la validation, mais il demande encore une clarification ciblée :", summary.a2a_questions, 'a2a');
+    return true;
+  }
+  if (summary.phase === 'complete') {
+    currentMode = 'complete';
+    updateAgents('alldone');
+    document.getElementById('notify').classList.remove('show');
+    addMsg('system', 'Pipeline automatique terminé : Agent 2, Agent 3 et export cahier des charges sont prêts.');
+    goTab(3);
+    return true;
+  }
+  if (asList(summary.requirements).length) {
+    currentMode = 'requirements';
+    updateAgents('running3');
+    addMsg('system', 'Agent 2 a généré les requirements. Agent 3 continue ou peut être relancé si nécessaire.');
+    goTab(3);
+    return true;
+  }
+  return false;
+}
+
+function shouldAutoRunPipeline(summary) {
+  return Boolean(
+    summary &&
+    summary.ready_for_agent2 &&
+    !asList(summary.requirements).length &&
+    !asList(summary.user_stories).length &&
+    summary.phase !== 'a2a'
+  );
+}
+
+function scheduleAutoPipeline(summary, reason = "Les informations sont suffisantes.") {
+  if (!shouldAutoRunPipeline(summary) || autoRunScheduled || autoRunAttempts >= 1) return;
+  autoRunScheduled = true;
+  autoRunAttempts += 1;
+  addMsg('system', `${reason} Lancement automatique Agent 2 -> Agent 3.`);
+  setTimeout(() => generate(true), 80);
+}
+
+function addAgentQuestions(from, intro, questions, submitKind, previousAnswers = []) {
+  const form = document.createElement('form');
+  form.className = 'answer-form';
+  form.innerHTML = questions.map((question, index) => `
+    <div class="answer-field">
+      <label class="answer-label"><span class="q-idx">${index + 1}</span><span>${esc(question)}</span></label>
+      <textarea class="answer-textarea" data-index="${index}" placeholder="Réponse précise et exploitable...">${esc(previousAnswers[index] || '')}</textarea>
+    </div>
+  `).join('') + `<button class="mini-btn" type="submit">Envoyer les réponses</button>`;
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (busy) return;
+    const answers = [...form.querySelectorAll('.answer-textarea')].map(el => el.value.trim());
+    if (answers.every(answer => !answer)) {
+      addMsg('system', 'Ajoutez au moins une réponse avant de continuer.');
+      return;
+    }
+    form.querySelector('.mini-btn').disabled = true;
+    addMsg('user', answers.map((answer, index) => `R${index + 1}. ${answer || 'Non renseigné'}`).join('<br>'));
+    if (submitKind === 'answers') await submitAnswers(answers);
+    if (submitKind === 'a2a') await submitA2A(answers);
+  });
+
+  addMsg(from, esc(intro), form);
+}
+
+async function submitAnswers(answers) {
+  autoRunAttempts = 0;
+  setBusy(true, 'Agent 1 contrôle');
+  addTyping('A1');
+  startLiveTrace(
+    'Agent 1 - Contrôle des réponses',
+    [
+      'Lecture des réponses stakeholder',
+      'Détection des réponses vides ou vagues',
+      'Stockage dans le SharedState',
+      'Décision : prêt pour Agent 2 ou nouvelle clarification',
+      'Lancement automatique Agent 2 puis Agent 3 si possible'
+    ],
+    'Agent 1 vérifie les réponses. Si elles sont exploitables, le serveur enchaîne automatiquement Agent 2, Agent 3 et l’export.'
+  );
+  try {
+    const summary = await apiJson('/api/answers', {project_id: projectId, answers});
+    removeTyping();
+    stopLiveTrace('Réponses traitées. Si elles sont suffisantes, Agent 2/3 ont été lancés automatiquement.');
+    updateFromSummary(summary);
+    if (asList(summary.answer_quality_issues).length) {
+      const issues = renderIssues(summary.answer_quality_issues);
+      addMsg('agent', "Agent 1 garde la main : certaines réponses ne sont pas assez exploitables.", issues);
+      addAgentQuestions('agent', 'Répondez avec plus de détails concrets :', summary.clarification_questions, 'answers', summary.stakeholder_answers);
+      currentMode = 'clarification';
+      return;
+    }
+    if (handleAutomaticSummary(summary)) {
+      return;
+    }
+    currentMode = 'ready';
+    updateAgents('done1');
+    addMsg('agent', "Parfait. Les réponses sont stockées. Le pipeline automatique prend la suite.");
+    document.getElementById('notify').classList.add('show');
+  } catch (error) {
+    removeTyping();
+    failLiveTrace(error.message);
+    addMsg('system', error.message);
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function generate(force = false) {
+  if (!projectId || (busy && !force)) return;
+  autoRunScheduled = false;
+  setBusy(true, 'Agent 2 travaille');
+  document.getElementById('btn-gen').disabled = true;
+  document.getElementById('gen-anim').classList.add('show');
+  setGenStep(0);
+  updateAgents('running2');
+  startLiveTrace(
+    'Pipeline Agent 2 → Agent 3',
+    [
+      'Agent 2 consolide les réponses stakeholder',
+      'Agent 2 vérifie suffisance, ambiguïtés et contradictions',
+      'Agent 2 génère les requirements REQ',
+      'Agent 3 transforme en epics, stories et backlog',
+      'Export du cahier des charges Markdown/PDF'
+    ],
+    'Cette étape peut être la plus longue, surtout si le modèle local répond lentement.'
+  );
+
+  try {
+    const summary = await apiJson('/api/generate', {project_id: projectId});
+    stopLiveTrace('Pipeline terminé ou en attente de clarification A2A.');
+    setGenStep(1);
+    updateFromSummary(summary);
+
+    if (summary.phase === 'a2a') {
+      setGenStep(null);
+      currentMode = 'a2a';
+      goTab(1);
+      addAgentQuestions('a2', "Agent 2 a compris le contexte, mais il détecte encore un manque bloquant. Répondez à ces questions A2A :", summary.a2a_questions, 'a2a');
+      return;
+    }
+
+    setGenStep(2);
+    setGenStep(3);
+    updateAgents('alldone');
+    currentMode = 'complete';
+    addMsg('system', 'Agent 2 et Agent 3 ont terminé. Le cahier des charges est disponible dans Export.');
+    goTab(3);
+  } catch (error) {
+    failLiveTrace(error.message);
+    addMsg('system', error.message);
+  } finally {
+    autoRunScheduled = false;
+    setBusy(false);
+  }
+}
+
+async function submitA2A(answers) {
+  autoRunAttempts = 0;
+  setBusy(true, 'Boucle A2A');
+  addTyping('A2');
+  startLiveTrace(
+    'Boucle A2A Agent 2 → Agent 1',
+    [
+      'Stockage des nouvelles réponses humaines',
+      'Agent 1 contrôle la qualité des réponses',
+      'Agent 2 relance la validation',
+      'Génération des requirements si le contexte est suffisant',
+      'Agent 3 met à jour les artefacts agiles'
+    ],
+    'La boucle A2A continue tant que les informations restent insuffisantes.'
+  );
+  try {
+    const summary = await apiJson('/api/a2a', {project_id: projectId, answers});
+    removeTyping();
+    stopLiveTrace('Boucle A2A traitée.');
+    updateFromSummary(summary);
+
+    if (asList(summary.answer_quality_issues).length) {
+      const issues = renderIssues(summary.answer_quality_issues);
+      addMsg('agent', "Agent 1 bloque encore le passage : réponse trop vague ou incomplète.", issues);
+      addAgentQuestions('agent', 'Précisez les réponses demandées :', summary.clarification_questions, 'answers', summary.stakeholder_answers);
+      currentMode = 'clarification';
+      return;
+    }
+
+    if (summary.phase === 'a2a') {
+      currentMode = 'a2a';
+      addAgentQuestions('a2', "Agent 2 demande encore une clarification ciblée :", summary.a2a_questions, 'a2a');
+      return;
+    }
+
+    updateAgents('alldone');
+    currentMode = 'complete';
+    addMsg('system', 'Boucle A2A terminée. Requirements, backlog et cahier des charges générés.');
+    goTab(3);
+  } catch (error) {
+    removeTyping();
+    failLiveTrace(error.message);
+    addMsg('system', error.message);
+  } finally {
+    setBusy(false);
+  }
+}
+
+function renderIssues(issues) {
+  const box = document.createElement('div');
+  box.className = 'issue-box';
+  box.innerHTML = issues.map(issue => `<div><b>${esc(issue.id)}</b> : ${esc(issue.issue)}<br><span>${esc(issue.question)}</span></div>`).join('<br>');
+  return box;
+}
+
+function updateFromSummary(summary) {
+  lastSummary = summary;
+  const info = summary.extracted_info || {};
+  setText('vv-input', summary.raw_input || '-');
+  setText('vv-domain', info.domaine || '-');
+  setText('vv-actors', asList(info.acteurs).join(', ') || '-');
+  setText('vv-goal', info.objectif_principal || '-');
+  setText('vv-status', summary.workflow_status || '-');
+  setText('vv-questions', `${asList(summary.clarification_questions).length} question(s), ${asList(summary.stakeholder_answers).length} réponse(s)`);
+
+  updateChip('domain', info.domaine);
+  updateChip('actors', asList(info.acteurs).join(', '));
+  updateChip('goal', info.objectif_principal);
+
+  let progress = 15;
+  if (summary.phase === 'clarification') progress = 35;
+  if (summary.phase === 'ready_for_agent2') progress = 50;
+  if (summary.requirements?.length) progress = 75;
+  if (summary.user_stories?.length) progress = 100;
+  updateProgress(progress);
+
+  document.getElementById('btn-gen').disabled = !summary.ready_for_agent2 || busy;
+  renderRequirements(summary.requirements || []);
+  renderStories(summary.user_stories || []);
+  renderBacklog(summary.backlog || []);
+  renderResult(summary);
+  updateExportLinks(summary);
+  addErrors(summary);
+  scheduleAutoPipeline(summary);
+}
+
+function addErrors(summary) {
+  const errors = asList(summary.errors).filter(Boolean);
+  if (!errors.length) return;
+  const last = errors.slice(-2).join(' | ');
+  console.warn(last);
+}
+
+function setText(id, value) {
+  document.getElementById(id).textContent = value;
+}
+
+function updateChip(name, value) {
+  const val = document.getElementById(`cv-${name}`);
+  const chip = document.getElementById(`chip-${name}`);
+  if (value) {
+    val.textContent = value;
+    val.classList.remove('empty');
+    chip.classList.add('filled');
+  }
+}
+
+function updateProgress(pct) {
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+}
+
+function renderRequirements(requirements) {
+  const panel = document.getElementById('rp1');
+  if (!requirements.length) {
+    panel.innerHTML = '<div class="empty-panel">Les requirements apparaîtront après Agent 2.</div>';
+    return;
+  }
+  const groups = {};
+  requirements.forEach(req => {
+    const type = req.type || 'unspecified';
+    groups[type] = groups[type] || [];
+    groups[type].push(req);
+  });
+  panel.innerHTML = Object.entries(groups).map(([type, items]) => `
+    <div class="r-section">
+      <div class="r-section-title">${esc(type)}</div>
+      ${items.map(req => `
+        <div class="req-item">
+          <div class="req-id-tag">${esc(req.id)}</div>
+          <div class="req-text">${esc(req.title || req.description || '')}</div>
+          <div class="req-type">${esc(req.type || '')} · ${esc(req.priority || '')}</div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function renderStories(stories) {
+  const panel = document.getElementById('rp2');
+  if (!stories.length) {
+    panel.innerHTML = '<div class="empty-panel">Les user stories apparaîtront après Agent 3.</div>';
+    return;
+  }
+  panel.innerHTML = stories.map(story => {
+    const priorityClass = String(story.priority || 'should').toLowerCase();
+    const ac = asList(story.acceptance_criteria)[0] || {};
+    const acHtml = ac.id ? `
+      <div class="us-ac">Given ${esc(ac.given || '')}<br>When ${esc(ac.when || '')}<br>Then ${esc(ac.then || '')}</div>
+    ` : '';
+    return `
+      <div class="us-item">
+        <div class="us-header"><span class="us-id">${esc(story.id)}</span><span class="moscow ${priorityClass}">${esc(story.priority || 'Should')}</span></div>
+        <div class="us-text">${esc(story.story || story.title || '')}</div>
+        ${acHtml}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderBacklog(backlog) {
+  const panel = document.getElementById('rp3');
+  if (!backlog.length) {
+    panel.innerHTML = '<div class="empty-panel">Le backlog apparaîtra après Agent 3.</div>';
+    return;
+  }
+  panel.innerHTML = `
+    <div class="r-section">
+      <div class="r-section-title">Backlog initial priorisé</div>
+      ${backlog.map(item => `
+        <div class="backlog-row">
+          <span class="bl-id">${esc(item.item_id || '')}</span>
+          <span class="bl-text">${esc(item.title || '')}</span>
+          <span class="bl-pts">${esc(item.story_points || 0)} pts</span>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function renderResult(summary) {
+  setText('count-req', asList(summary.requirements).length);
+  setText('count-us', asList(summary.user_stories).length);
+  setText('count-backlog', asList(summary.backlog).length);
+  setText('result-status', summary.workflow_status || '-');
+
+  const trace = asList(summary.agent_trace).slice(-12);
+  const target = document.getElementById('trace-list');
+  if (!trace.length) {
+    target.innerHTML = '<div class="empty-panel">Le journal des agents apparaîtra ici.</div>';
+    return;
+  }
+  target.innerHTML = trace.map(item => `
+    <div class="trace-item">
+      <div class="trace-agent">${esc(item.agent || 'Agent')} · ${esc(item.step || '')}</div>
+      <div>${esc(item.observation || '')}</div>
+      ${item.decision ? `<div style="color:var(--text-2);margin-top:3px">Décision : ${esc(item.decision)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function updateExportLinks(summary) {
+  const exports = summary.exports || {};
+  const ids = [
+    ['export-pdf', 'pdf'],
+    ['export-pdf-main', 'pdf'],
+    ['export-md', 'markdown'],
+    ['export-md-main', 'markdown'],
+    ['export-json', 'json'],
+    ['export-json-main', 'json']
+  ];
+  ids.forEach(([id, kind]) => {
+    const node = document.getElementById(id);
+    const available = kind === 'json' ? !!summary.project_id : !!exports[kind];
+    node.classList.toggle('disabled', !available);
+    node.href = available ? `/api/download?id=${encodeURIComponent(summary.project_id)}&kind=${encodeURIComponent(kind)}` : '#';
+  });
+
+  const paths = [];
+  if (exports.pdf) paths.push(`PDF : ${exports.pdf}`);
+  if (exports.markdown) paths.push(`Markdown : ${exports.markdown}`);
+  document.getElementById('export-paths').textContent = paths.length ? paths.join('\n') : "Aucun export disponible pour l'instant.";
+}
+
+function setGenStep(index) {
+  ['gs1','gs2','gs3','gs4'].forEach((id, i) => {
+    const node = document.getElementById(id);
+    node.classList.toggle('active', index === i);
+    node.classList.toggle('done', index !== null && i < index);
+  });
+}
+
+function updateAgents(state) {
+  const set = (n, mode, label) => {
+    const row = document.getElementById(`ar${n}`);
+    const badge = document.getElementById(`ab${n}`);
+    row.classList.remove('active', 'done');
+    if (mode) row.classList.add(mode);
+    badge.textContent = label;
+    badge.className = 'agent-badge ' + (mode === 'active' ? 'badge-active' : mode === 'done' ? 'badge-done' : 'badge-wait');
+  };
+  if (state === 'done1') {
+    set(1, 'done', 'terminé'); set(2, '', 'attente'); set(3, '', 'attente');
+  } else if (state === 'running2') {
+    set(1, 'done', 'terminé'); set(2, 'active', 'actif'); set(3, '', 'attente');
+  } else if (state === 'running3') {
+    set(1, 'done', 'terminé'); set(2, 'done', 'terminé'); set(3, 'active', 'actif');
+  } else if (state === 'alldone') {
+    set(1, 'done', 'terminé'); set(2, 'done', 'terminé'); set(3, 'done', 'terminé');
+  } else {
+    set(1, 'active', 'actif'); set(2, '', 'attente'); set(3, '', 'attente');
+  }
+}
+
+function goTab(n) {
+  const waitingForAutoPipeline =
+    n === 2 &&
+    lastSummary &&
+    lastSummary.ready_for_agent2 &&
+    !asList(lastSummary.requirements).length &&
+    !asList(lastSummary.user_stories).length;
+
+  if (waitingForAutoPipeline) {
+    n = 1;
+    scheduleAutoPipeline(
+      lastSummary,
+      "Validation prête. Je ne reste pas sur un écran d'attente."
+    );
+  }
+
+  ['p1','p2','p3','p4'].forEach((id, index) => {
+    document.getElementById(id).classList.toggle('active', index === n - 1);
+  });
+  document.querySelectorAll('.nav-step').forEach((tab, index) => {
+    tab.classList.toggle('active', index === n - 1);
+    tab.classList.toggle('done', index < n - 1);
+  });
+}
+
+function rightTab(n) {
+  document.querySelectorAll('.r-tab').forEach((tab, index) => tab.classList.toggle('active', index === n - 1));
+  document.querySelectorAll('.r-panel').forEach((panel, index) => panel.classList.toggle('active', index === n - 1));
+}
+
+function newProject() {
+  projectId = null;
+  selectedFile = null;
+  currentMode = 'initial';
+  lastSummary = null;
+  busy = false;
+  autoRunScheduled = false;
+  autoRunAttempts = 0;
+  document.getElementById('msg-list').innerHTML = '';
+  document.getElementById('chat-input').value = '';
+  document.getElementById('file-input').value = '';
+  document.getElementById('file-pill').textContent = '';
+  document.getElementById('notify').classList.remove('show');
+  document.getElementById('gen-anim').classList.remove('show');
+  document.getElementById('btn-gen').disabled = true;
+  document.querySelectorAll('.chip-val').forEach(el => { el.textContent = el.id === 'cv-actors' ? 'Non détectés' : 'Non détecté'; el.classList.add('empty'); });
+  document.querySelectorAll('.context-chip').forEach(el => el.classList.remove('filled'));
+  updateProgress(0);
+  updateAgents('reset');
+  renderRequirements([]);
+  renderStories([]);
+  renderBacklog([]);
+  renderResult({agent_trace: [], requirements: [], user_stories: [], backlog: []});
+  updateExportLinks({project_id: '', exports: {}});
+  goTab(1);
+  setTimeout(() => addMsg('agent', "Bonjour. Décrivez votre projet ou joignez un fichier client. Agent 1 va analyser la demande et générer les questions de clarification."), 150);
+}
+
+function showHelp() {
+  addMsg('system', "Flux automatique : 1) saisie ou fichier, 2) Agent 1 génère les questions, 3) vous répondez, 4) Agent 2/3 se lancent seuls, 5) export cahier des charges. Pour Hugging Face, le Space démarre en mode démo local ; ajoutez GEMINI_API_KEY en secret pour le mode LLM réel.");
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  newProject();
+});
+</script>
+</body>
+</html>

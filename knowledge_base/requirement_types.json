@@ -1,0 +1,60 @@
+{
+  "purpose": "Guide Agent 2 pour classifier les exigences.",
+  "types": [
+    {
+      "id": "functional",
+      "label": "Functional requirement",
+      "description": "Comportement ou action que le systeme doit permettre.",
+      "example": "Le systeme doit permettre au client de soumettre une reclamation."
+    },
+    {
+      "id": "non_functional",
+      "label": "Non-functional requirement",
+      "description": "Qualite attendue du systeme: performance, ergonomie, disponibilite, compatibilite.",
+      "example": "Le systeme doit afficher le tableau de bord en moins de 3 secondes."
+    },
+    {
+      "id": "business_rule",
+      "label": "Business rule",
+      "description": "Regle metier, condition, limite ou calcul applique par le systeme.",
+      "example": "Une reclamation fermee ne peut plus etre modifiee par le client."
+    },
+    {
+      "id": "data",
+      "label": "Data requirement",
+      "description": "Donnee, entite, champ, historique ou piece jointe a gerer.",
+      "example": "Chaque reclamation doit contenir un identifiant, un type, un statut et une date de creation."
+    },
+    {
+      "id": "security",
+      "label": "Security requirement",
+      "description": "Authentification, autorisation, confidentialite, journalisation ou protection des donnees.",
+      "example": "Seul un agent autorise doit pouvoir consulter les reclamations affectees a son service."
+    },
+    {
+      "id": "reporting",
+      "label": "Reporting requirement",
+      "description": "Statistique, indicateur, filtre, tableau de bord ou export.",
+      "example": "Le systeme doit calculer le temps moyen de traitement des reclamations par type."
+    },
+    {
+      "id": "integration",
+      "label": "Integration requirement",
+      "description": "Communication avec un service externe, API, email, paiement ou outil tiers.",
+      "example": "Le systeme doit envoyer les emails via le service SMTP de l'entreprise."
+    },
+    {
+      "id": "ui_ux",
+      "label": "UI/UX requirement",
+      "description": "Besoin d'interface, navigation, accessibilite ou experience utilisateur.",
+      "example": "Le client doit voir l'historique de ses reclamations depuis un espace personnel."
+    },
+    {
+      "id": "constraint",
+      "label": "Constraint",
+      "description": "Contrainte imposee: technologie, budget, delai, hebergement, legal.",
+      "example": "La solution doit etre une application web responsive."
+    }
+  ],
+  "priorities": ["Must", "Should", "Could", "Won't"]
+}

@@ -1,0 +1,79 @@
+{
+  "purpose": "Guide Agent 1 pour detecter les informations manquantes et generer des questions utiles.",
+  "priority_order": [
+    "objectif_principal",
+    "acteurs_roles_permissions",
+    "fonctionnalites_mvp",
+    "workflows_statuts_validations",
+    "donnees_entites_champs",
+    "regles_metier",
+    "notifications",
+    "reporting_statistiques",
+    "securite_confidentialite",
+    "contraintes_techniques",
+    "integrations",
+    "criteres_acceptation"
+  ],
+  "categories": [
+    {
+      "id": "objectif_principal",
+      "ask_when": "Le but du projet est vague ou multiple.",
+      "question_style": "Quel est l'objectif principal a atteindre avec cette solution ?"
+    },
+    {
+      "id": "acteurs_roles_permissions",
+      "ask_when": "Les utilisateurs, leurs droits ou leurs responsabilites ne sont pas clairs.",
+      "question_style": "Quels profils utiliseront le systeme et quelles actions chaque profil pourra faire ?"
+    },
+    {
+      "id": "fonctionnalites_mvp",
+      "ask_when": "Les fonctionnalites obligatoires de la premiere version ne sont pas explicites.",
+      "question_style": "Quelles fonctionnalites sont obligatoires dans la premiere version MVP ?"
+    },
+    {
+      "id": "workflows_statuts_validations",
+      "ask_when": "Un processus, une validation, une affectation ou un suivi de statut est mentionne sans details.",
+      "question_style": "Quelles sont les etapes du workflow, les statuts possibles et qui valide chaque etape ?"
+    },
+    {
+      "id": "donnees_entites_champs",
+      "ask_when": "Les donnees a stocker ou manipuler ne sont pas detaillees.",
+      "question_style": "Quelles donnees doivent etre enregistrees pour chaque objet principal ?"
+    },
+    {
+      "id": "regles_metier",
+      "ask_when": "Des decisions automatiques, calculs, limites ou conditions sont implicites.",
+      "question_style": "Quelles regles metier doivent etre appliquees par le systeme ?"
+    },
+    {
+      "id": "notifications",
+      "ask_when": "Le projet implique des changements de statut, validations, messages ou alertes.",
+      "question_style": "Quelles notifications faut-il envoyer, a qui, par quel canal et a quel moment ?"
+    },
+    {
+      "id": "reporting_statistiques",
+      "ask_when": "Le client demande des statistiques, tableaux de bord ou rapports sans indicateurs precis.",
+      "question_style": "Quels indicateurs doivent etre affiches et avec quels filtres ?"
+    },
+    {
+      "id": "securite_confidentialite",
+      "ask_when": "Des comptes, donnees personnelles, paiement ou informations sensibles sont presents.",
+      "question_style": "Quelles contraintes de securite, authentification et confidentialite faut-il respecter ?"
+    },
+    {
+      "id": "contraintes_techniques",
+      "ask_when": "La technologie, l'hebergement, la compatibilite ou la plateforme ne sont pas connus.",
+      "question_style": "Y a-t-il des contraintes techniques imposees pour la solution ?"
+    },
+    {
+      "id": "integrations",
+      "ask_when": "Le systeme doit communiquer avec paiement, email, ERP, CRM, API ou service externe.",
+      "question_style": "Quelles integrations externes sont necessaires ?"
+    },
+    {
+      "id": "criteres_acceptation",
+      "ask_when": "Une fonctionnalite est importante mais les conditions de validation ne sont pas testables.",
+      "question_style": "Comment saura-t-on que cette fonctionnalite est acceptee par le stakeholder ?"
+    }
+  ]
+}
