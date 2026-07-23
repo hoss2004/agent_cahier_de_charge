@@ -4,5 +4,11 @@
     "app.py": {
       "excludeFiles": "{.venv/**,.tmp/**,outputs/**,test/**,**/__pycache__/**,*.log,*.zip,*.rar}"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/app.py"
+    }
+  ]
 }
