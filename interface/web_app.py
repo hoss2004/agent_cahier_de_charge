@@ -33,8 +33,11 @@ with warnings.catch_warnings():
 ROOT_DIR = Path(__file__).resolve().parents[1]
 INTERFACE_DIR = ROOT_DIR / "interface"
 INDEX_PATH = INTERFACE_DIR / "index.html"
-UPLOAD_DIR = Path(os.getenv("REQBOT_UPLOAD_DIR", ROOT_DIR / ".tmp" / "uploads"))
-OUTPUT_DIR = Path(os.getenv("REQBOT_OUTPUT_DIR", ROOT_DIR / "outputs"))
+IS_SERVERLESS = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+DEFAULT_UPLOAD_DIR = Path("/tmp/reqbot_uploads") if IS_SERVERLESS else ROOT_DIR / ".tmp" / "uploads"
+DEFAULT_OUTPUT_DIR = Path("/tmp/reqbot_outputs") if IS_SERVERLESS else ROOT_DIR / "outputs"
+UPLOAD_DIR = Path(os.getenv("REQBOT_UPLOAD_DIR", DEFAULT_UPLOAD_DIR))
+OUTPUT_DIR = Path(os.getenv("REQBOT_OUTPUT_DIR", DEFAULT_OUTPUT_DIR))
 DEFAULT_HOST = "0.0.0.0" if os.getenv("SPACE_ID") else "127.0.0.1"
 HOST = os.getenv("REQBOT_HOST", DEFAULT_HOST)
 PORT = int(os.getenv("PORT") or os.getenv("REQBOT_PORT", "8000"))
