@@ -5,6 +5,8 @@ ReqBot est une plateforme intelligente d'aide a la specification logicielle. Le 
 L'objectif principal est d'assister la phase de cadrage d'un projet informatique. Dans un contexte reel, une demande client est souvent incomplete, vague ou mal structuree. ReqBot joue le role d'un assistant d'analyse fonctionnelle : il comprend la demande, pose les bonnes questions, controle la qualite des reponses, puis genere une base documentaire claire pour lancer le projet.
 
 ---
+# voici le lien de l'application:
+https://agent-cahier-de-charge-p1r4h3hcg.vercel.app/
 
 ## Table des matieres
 
