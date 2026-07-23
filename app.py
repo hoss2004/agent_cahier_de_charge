@@ -1,6 +1,13 @@
-"""Entrypoint Hugging Face Spaces / production locale."""
+"""Production entrypoints for ReqBot.
 
-from interface.web_app import main
+Local execution uses ``main()``.
+Vercel's Python runtime imports the top-level ``handler`` variable.
+"""
+
+from interface.web_app import ReqBotHandler, main
+
+
+handler = ReqBotHandler
 
 
 if __name__ == "__main__":

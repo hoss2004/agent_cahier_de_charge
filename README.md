@@ -480,6 +480,45 @@ python -m agents.orchestrator
 
 ---
 
+## Deploiement sur Vercel
+
+Le projet peut etre importe depuis GitHub vers Vercel avec le preset Python.
+
+Vercel ne lance pas directement un serveur Python classique avec `serve_forever()`. Sa runtime Python cherche une entree compatible serverless dans `app.py`. Pour cette raison, le fichier `app.py` expose une variable top-level :
+
+```python
+handler = ReqBotHandler
+```
+
+Cette classe herite de `BaseHTTPRequestHandler` et permet a Vercel de router les requetes vers l'interface web et les endpoints API.
+
+Variables d'environnement a ajouter dans Vercel :
+
+```text
+GEMINI_API_KEY=ta_cle_api
+LLM_PROVIDER=gemini
+MODEL_NAME=gemini-3.5-flash
+MOCK_LLM=false
+REQBOT_UPLOAD_DIR=/tmp/reqbot_uploads
+REQBOT_OUTPUT_DIR=/tmp/reqbot_outputs
+```
+
+Pour une demonstration sans vrai LLM :
+
+```text
+MOCK_LLM=true
+LLM_PROVIDER=local
+```
+
+Notes importantes pour Vercel :
+
+- les fonctions Vercel sont serverless, donc les traitements tres longs peuvent etre limites ;
+- les fichiers generes doivent etre consideres comme temporaires ;
+- l'etat en memoire peut etre perdu si la fonction redemarre ;
+- pour une version production robuste, il faudrait ajouter une base de donnees ou un stockage externe.
+
+---
+
 ## Utilisation
 
 Exemple de demande :
@@ -604,4 +643,3 @@ Ameliorations possibles :
 ReqBot est un projet de stage / prototype avance autour de l'utilisation des agents intelligents pour l'analyse des besoins logiciels.
 
 Le projet montre comment une architecture multi-agent peut aider a transformer une demande client non structuree en livrables projet exploitables.
-

@@ -1,0 +1,15 @@
+.git
+.agents
+.codex
+.venv
+__pycache__
+*.pyc
+.env
+.env.*
+!.env.example
+.tmp
+outputs
+test
+*.log
+*.zip
+*.rar
